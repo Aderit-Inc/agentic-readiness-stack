@@ -4,7 +4,7 @@
 
 *By Bennett M. Reddin*
 
-This document compares the [Agentic Readiness Stack](./README.md) with Asanka Abeysinghe's *Trusted AI Governance* (Abeysinghe 2026), an architectural thesis for governing agentic systems in the enterprise. The comparison is offered in the spirit of the source: Abeysinghe's paper is deliberately vendor-neutral and invites exactly this kind of mapping. Where his model exposes gaps in the stack, this document says so plainly and records what the stack intends to adopt. Where the stack covers ground his model does not, it says that too.
+This document compares the [Agentic Readiness Stack](./README.md) with Asanka Abeysinghe's [Trusted AI Governance (Abeysinghe 2026)](https://github.com/wso2/reference-architecture/blob/master/trusted-ai-governance.md), an architectural thesis for governing agentic systems in the enterprise. The comparison is offered in the spirit of the source: Abeysinghe's paper is deliberately vendor-neutral and invites exactly this kind of mapping. Where his model exposes gaps in the stack, this document says so plainly and records what the stack intends to adopt. Where the stack covers ground his model does not, it says that too.
 
 ---
 

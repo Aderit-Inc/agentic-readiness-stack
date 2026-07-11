@@ -26,7 +26,7 @@ Where they differ is altitude, and the difference is productive.
 
 **The Agentic Readiness Stack is a graded inventory for a deployment.** Its unit of analysis is a platform or system being built: the eighteen layers that must exist before the agents running on it can be trusted with consequential work, each with a falsifiable self-test. It assumes someone is constructing the thing being governed, which is why it can be concrete about mechanisms (write governance, closure semantics, reversibility classes, rank ladders) that an estate-wide model must leave abstract.
 
-The steel-man for treating them as competitors is that they cover overlapping territory with different vocabularies, and frameworks compete for mindshare whether their authors intend it or not. The puncture is that their units of analysis do not overlap. An enterprise applies a capability model to govern an estate it mostly did not build. A platform team applies a readiness stack to grade a system it is building. The natural composition is nesting: the capability model governs the estate; each governed platform within the estate is graded by the stack. Neither substitutes for the other, and an enterprise that adopted both would find one integration seam, not a turf war.
+The illusion of the two approaches as competitors is that they cover overlapping territory with different vocabularies, and frameworks compete for mindshare whether their authors intend it or not. The reality is that their units of analysis do not overlap. An enterprise applies a capability model to govern an estate it mostly did not build. A platform team applies a readiness stack to grade a system it is building. The natural composition is nesting: the capability model governs the estate; each governed platform within the estate is graded by the stack. Neither substitutes for the other, and an enterprise that adopted both would find one integration seam, not a turf war.
 
 ## 3. The mapping
 
@@ -64,7 +64,7 @@ Four items, recorded here as the stack's open adoption ledger. Consistent with t
 
 ## 5. What the stack presses on the capability model
 
-Recorded with the same directness, because the traffic runs both ways.
+Recorded with the same directness, because the conversation runs both ways.
 
 **5.1 Memory as a governed write surface.** The capability model treats memory and context as inputs that alter agent behavior, which they are. The stack's Layer 9 treats durable memory as a belief set requiring write governance, confirmation tiers, and immutable write audit, because the persistent form of the injection problem arrives through a stored memory the agent trusts, not through a prompt. Estate-level governance that inspects boundaries but not belief formation will pass an agent whose worldview was quietly poisoned last month.
 

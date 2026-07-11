@@ -16,7 +16,7 @@ An agent doesn't become trustworthy because it got talented. It becomes trustwor
 
 This is that system.
 
-> This page is the map. The reasoning behind each layer, the pillar structure, and the cross-cutting relationships live in **[THESIS.md](./THESIS.md)**.
+> This page is the map. The reasoning behind each layer, the pillar structure, and the cross-cutting relationships live in THESIS.md. A reading of the stack against Abeysinghe's Trusted AI Governance capability model, including the stack's open adoption ledger, lives in COMPARISON.md..
 
 ---
 

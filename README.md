@@ -16,11 +16,11 @@ An agent doesn't become trustworthy because it got talented. It becomes trustwor
 
 This is that system.
 
-> This page is the map. The reasoning behind each layer, the pillar structure, and the cross-cutting relationships live in THESIS.md. A reading of the stack against Abeysinghe's Trusted AI Governance capability model, including the stack's open adoption ledger, lives in COMPARISON.md..
+> This page is the map. The reasoning behind each layer, the pillar structure, and the cross-cutting relationships live in **[THESIS.md](./THESIS.md)**. A reading of the stack against Abeysinghe's *Trusted AI Governance* capability model, including the stack's open adoption ledger, lives in **[COMPARISON.md](./COMPARISON.md)**.
 
 ---
 
-## Part One — Foundational Infrastructure (Layers 1-8)
+## Part One: Foundational Infrastructure (Layers 1-8)
 
 *The infrastructure most enterprise architects already recognize: necessary, largely understood, and not where the hard part lives.*
 
@@ -35,7 +35,7 @@ This is that system.
 
 ---
 
-## Part Two — The Agentic Control Plane (Layers 9-18)
+## Part Two: The Agentic Control Plane (Layers 9-18)
 
 *The layers that stay invisible until agents are in production and failing in subtle ways. This is what separates a demo from a business.*
 
@@ -85,4 +85,4 @@ This repository is published under the MIT License (see [LICENSE](./LICENSE)).
 
 ## Attribution
 
-The Agentic Readiness Stack © Bennett M. Reddin. Cite as: *Reddin, B. — The Agentic Readiness Stack (18-Layer Framework).*
+The Agentic Readiness Stack © Bennett M. Reddin. Cite as: *Reddin, B., The Agentic Readiness Stack (18-Layer Framework).*

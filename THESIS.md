@@ -1,303 +1,315 @@
 # Safe to Employ, Safe to Trust
 
-### The Agentic Readiness Stack: the thesis behind the map
+### An architectural argument for the Agentic Readiness Stack
 
 *By Bennett M. Reddin*
 
-The [README](./README.md) is the map. This is the reasoning.
+The [README](./README.md) is the map. This document is the argument: what each of the eighteen layers is, why it is hard, what it prevents, and how the layers relate as pillars and cross-cutting disciplines.
 
 ---
 
-## Why a stack, and why now
+## 1. The assurance premise, and why agents break it
 
-Enterprises spent forty years learning to trust software the slow way. A system earned production access by holding still: a specified contract, a test suite that exercised it, a change-control board that noticed when it moved. Trust was a property of the specification, and the specification did not change between Tuesday and Wednesday.
+Enterprise software assurance has rested on one premise for roughly forty years: behavior can be specified before deployment. The premise has worn many methods. Design by contract made the specification explicit in the interface (Meyer 1992). Verification and validation split the question into "built right" and "built the right thing." Change control boards existed to notice when a specified system moved. Under all of them, trust was a property of the specification, and the specification did not change between Tuesday and Wednesday.
 
-Agents do not offer that deal. An agent's output varies with its input, its context, its tools, its memory, and the other agents it talks to. You cannot approve the output in advance because there is no single output to approve. What you can govern is the system around the agent: who it is, what it may touch, what it may believe, when it must stop, and what proof it leaves behind.
+Agentic systems do not satisfy the premise. An agent's output is a function of its input, its retrieved context, its tool results, its accumulated memory, and the other agents it delegates to, and each of those varies at runtime. There is no fixed output contract to verify once and rely on thereafter. Pre-deployment evaluation retains value for models, prompts, and tools, but it cannot carry the assurance burden it carried for deterministic systems, because the artifact under governance is no longer only the output. It is the path: the authority used, the data touched, the calls made, the decision to act at all.
 
-That is the shift the stack encodes. Trust stops being a property of the model and becomes a property of the shop the model works in. A workshop does not hand an apprentice the client's ledger on day one, and not because the apprentice lacks talent. The workshop hands over the ledger when the supervision, the boundaries, and the records exist to make the handover survivable if it goes wrong.
+The consequence is architectural rather than procedural. If behavior cannot be specified in advance, assurance must attach to the system surrounding the agent: its identity, its permitted reach, its permitted beliefs, its stopping conditions, and the evidence it leaves. This document argues that the surrounding system decomposes into eighteen layers, and that readiness is the property of having all of them rather than the four to six that most organizations can currently claim.
 
-**An agent is ready when three things are true of every action it takes: the action is attributable to an identified actor and authority, bounded by limits set before the action rather than after, and provable after the fact to someone who was not in the room.**
+A working definition anchors everything that follows.
 
-Attributable. Bounded. Provable. Every layer below serves at least one of the three.
+**An agent is ready when three properties hold for every action it takes: the action is attributable to an identified actor and an explicit authority; bounded by limits established before the action rather than reconstructed after it; and provable, after the fact, to a party who was not present.**
 
----
-
-## How the stack is organized
-
-Eighteen layers, two parts, six pillars, and three layers that refuse to stay in their lane.
-
-**Part One (Layers 1-8)** is foundational infrastructure: the tools, doors, and stockroom of the shop. Most enterprise architects recognize these. Most enterprises have partial versions of four of them and believe they are further along than they are.
-
-**Part Two (Layers 9-18)** is the agentic control plane: the layers that govern what an agent believes, what authority it has earned, and what it is allowed to say. These stay invisible until agents are in production and failing in subtle ways, which is precisely why they separate a demo from a business.
-
-Within the parts, the layers group into pillars. A pillar is a set of layers that answer the same underlying question:
-
-| Pillar | Question it answers | Layers |
-|---|---|---|
-| I. The Actor | Who is acting, and with what standing? | 1, 2, 7 |
-| II. The Gates | How does action travel, and through what checks? | 3, 8 |
-| III. The Substrate | What does the agent know, and is it fit to reason on? | 5, 6 |
-| IV. Governed Belief | What may the agent come to believe, and how does belief improve? | 9, 10 |
-| V. Earned Authority | How much may the agent do on its own, and how does that change? | 11, 12, 13, 14 |
-| VI. Accountable Speech | What may the agent claim, and to whom? | 16, 18 |
-
-Three layers are deliberately absent from the pillar table because they are **cross-cutting**: they apply to every pillar at once rather than answering one question.
-
-- **Layer 4 (Observability & Audit)** cuts across everything in Part One and pairs with Layer 16 to form the evidence spine of the whole stack.
-- **Layer 15 (Structural Coherence & Drift)** watches the shape of the work itself, across every agent and every pillar.
-- **Layer 17 (Idempotency)** guards every write the stack ever makes, wherever it originates.
-
-And one layer, **Reversibility (13)**, sits inside Pillar V but reaches outward: its classification of every action modulates how strictly the rest of the stack applies. More on that in the cross-cutting section.
-
-Each layer below gets the same four-beat treatment. What it is. Why it is hard. What it prevents. And a one-line self-test: you don't have this layer if the test describes your shop.
+Attributable. Bounded. Provable. Every layer in the stack serves at least one of the three, and the layer descriptions below state which.
 
 ---
 
-## Part One: Foundational Infrastructure
+## 2. Structure of the stack
 
-*The tools and the doors. Necessary, largely understood, and not where the hard part lives.*
+Eighteen layers, two parts, six pillars, three cross-cutting disciplines.
+
+**Part One (Layers 1-8)** is foundational infrastructure. These layers predate agents; the literature behind most of them is decades old, and the sections below cite it. What agents change is not the concepts but the operating conditions: request volumes, retry behavior, and the requirement that authority travel with every hop.
+
+**Part Two (Layers 9-18)** is the agentic control plane: the layers that govern what an agent may believe, how much it may do unsupervised, and what it may claim to whom. These have thinner prior literature because their subject barely existed until recently. They are also where production failures concentrate, precisely because they are the layers a demo never exercises.
+
+Within the parts, layers group into pillars. A pillar is the set of layers answering one underlying question, and each pillar restates an established body of theory for the agentic case:
+
+| Pillar | Question | Layers | Restates |
+|---|---|---|---|
+| I. The Actor | Who is acting, with what standing? | 1, 2, 7 | Protection principles (Saltzer & Schroeder 1975) |
+| II. The Gates | Through what mediation does action travel? | 3, 8 | Complete mediation; stability patterns (Nygard 2007/2018) |
+| III. The Substrate | Is the data fit to reason on? | 5, 6 | Canonical modeling; information lineage |
+| IV. Governed Belief | What may the agent come to believe? | 9, 10 | Belief revision (Alchourrón, Gärdenfors & Makinson 1985) |
+| V. Earned Authority | How much may it do alone, and how does that change? | 11, 12, 13, 14 | Graduated automation (SAE J3016); compensating transactions (Garcia-Molina & Salem 1987) |
+| VI. Accountable Speech | What may it claim, and to whom? | 16, 18 | Provenance (W3C PROV 2013); information-flow control (Bell & LaPadula 1973) |
+
+Three layers are deliberately absent from the pillar table because they are cross-cutting: they are disciplines applied to every pillar rather than answers to one question. Layer 4 (observability) pairs with Layer 16 to form the stack's evidence spine. Layer 15 (structural coherence) monitors the shape of work across all agents and pillars. Layer 17 (idempotency) conditions every write the stack performs. Section 5 treats them together, along with the outward reach of Layer 13, whose action classification modulates the strictness of everything else.
+
+Each layer receives the same four-part treatment: what it is, why it is hard, what it prevents, and a falsifiable self-test phrased as *you don't have this layer if*. The self-tests are the operational content of the framework; a readiness claim that cannot survive them is a readiness claim in name only.
+
+---
+
+## 3. Part One: Foundational Infrastructure
 
 ### Pillar I. The Actor (Layers 1, 2, 7)
 
-Who is acting, and with what standing?
+The pillar restates the protection principles catalogued by Saltzer and Schroeder (1975): least privilege, complete mediation, and the separation of identity from mechanism. Nothing in the agentic case invalidates them. What the agentic case changes is the population of principals (software actors now outnumber human ones), the churn of their task assignments (hourly rather than quarterly), and the depth of delegation chains along which authority must remain traceable (Tomašev, Franklin & Osindero 2026).
 
 #### Layer 1: Identity
 
-**What it is.** Every request, human or agent, resolves to a verifiable actor with its own identity. An agent is not a feature of the application that hosts it, not an extension of the user who invoked it, and not a shared service account with a hopeful name.
+**What it is.** Every request, human or agent, resolves to a verifiable actor with a distinct identity. An agent is a first-class principal: not a feature of its host application, not an extension of the invoking user's session, not a shared service account.
 
-**Why it is hard.** The easy paths all lead away from it. Reusing the invoking user's session is one line of code. A shared service credential works on day one. Per-agent identity requires provisioning, lifecycle, and a decision about what an agent identity even is, and every shortcut looks harmless until the day two agents share one identity and an audit asks which of them did the thing.
+**Why it is hard.** Every low-effort path leads away from it. Reusing the invoking user's session is one line of code; a shared service credential works on day one. Distinct agent identity requires provisioning, lifecycle management, and a settled answer to what an agent identity denotes. The cost of the shortcut is deferred and compounding: it surfaces the first time an audit asks which of two agents performed an action and the access log offers one name for both.
 
-**What it prevents.** Anonymous action. When an agent acts as somebody else, every downstream layer degrades: authorization approximates, audit blurs, cost attribution guesses, and incident response starts with archaeology instead of a lookup.
+**What it prevents.** Anonymous action, and the degradation it induces downstream. When the actor is ambiguous, authorization approximates, audit blurs, cost attribution guesses, and incident response begins with archaeology. Identity does not make an agent safe; it makes an agent addressable, and addressability is the precondition for every control that follows. Serves: attributable.
 
-**You don't have this layer if** two of your agents would produce the same name in an access log.
+**You don't have this layer if** two of your agents would produce the same principal name in an access log.
 
 #### Layer 2: Authorization & Policy Enforcement
 
-**What it is.** Identity says who; policy says what they may do. Authorization for agents must be evaluated per action, in context, against the authority the agent is actually carrying for this task, not against a static grant issued at deployment.
+**What it is.** Identity establishes who; policy establishes what they may do. For agents, authorization must be evaluated per action, in context, against the authority the agent carries for the current task. The relevant model is delegation with attenuation: authority granted for a task, scoped to that task, and narrowed at each hand-off, rather than a static role grant issued at deployment.
 
-**Why it is hard.** Static grants are legible and comfortable, and they are wrong for actors whose tasks change hourly. An agent that legitimately reads a record for one purpose should not silently retain that reach for the next purpose. Getting this right means treating permission as something delegated per task and narrowed as work flows downhill, which is a different mental model than role assignment.
+**Why it is hard.** Static grants are legible, auditable, and wrong for actors whose task set changes hourly. The steel-man for static grants is real: they are how every existing IAM system thinks, and they compose with existing review processes. The puncture is arithmetic. An agent acting a thousand times an hour under a grant sized for its broadest task is over-privileged in the majority of its actions, and over-privilege that is exercised at machine rate is not a latent risk but a running one.
 
-**What it prevents.** The quiet accumulation of reach. A misconfigured policy on a human is a support ticket; on an agent that acts a thousand times an hour, it is a breach with a timestamp for every instance.
+**What it prevents.** The quiet accumulation of reach, and the category error of treating a policy misconfiguration as a support ticket. On a human timescale it is a ticket. At agent rate it is a breach with a timestamp for every instance.
 
-**You don't have this layer if** the answer to "what can this agent do right now" is the same as the answer from three months ago.
+**You don't have this layer if** the answer to "what may this agent do right now" is identical to the answer from three months ago.
 
 #### Layer 7: Secrets Management
 
-**What it is.** Credentials scoped to the narrowest job that needs them, rotated on schedule, revocable on demand, and never resident where the agent's code or memory could disclose them.
+**What it is.** Credentials scoped to the narrowest function requiring them, rotated on schedule, revocable on demand, and never resident where an agent's code, context window, or memory could disclose them.
 
-**Why it is hard.** Agents multiply the number of things holding credentials and the number of places a credential could leak, including novel ones: an agent can be talked into revealing what it holds. The discipline is old; the attack surface is new.
+**Why it is hard.** The discipline is old; the attack surface is new. Agents multiply both the count of credential holders and the modes of disclosure, including a genuinely novel one: a language-model agent can be induced to reveal what it holds. Secret-at-rest architecture must therefore assume the agent itself is a potential disclosure channel, which rules out patterns (credentials in configuration, credentials in prompt) that passed review for deterministic services.
 
-**What it prevents.** The compounding breach. One leaked credential in a multi-tenant system is not one incident; it is an incident multiplied by every tenant the credential can see.
+**What it prevents.** The compounding breach. In multi-tenant systems, one leaked credential is not one incident; it is one incident multiplied by every tenant within the credential's reach. Serves: bounded.
 
-**You don't have this layer if** revoking one agent's access requires finding every place a key was pasted.
+**You don't have this layer if** revoking one agent's access requires finding every location a key was pasted.
 
 ### Pillar II. The Gates (Layers 3, 8)
 
-How does action travel, and through what checks?
+The pillar restates complete mediation (every access checked, no exempt path) and the stability-pattern literature that grew out of large-scale service operations (Nygard 2007/2018). Agents stress both harder than human-driven load ever did, because retry, loop, and fan-out are not exceptional behaviors for an agent. They are its ordinary texture.
 
 #### Layer 3: API Management & Mediation
 
-**What it is.** Agents act through gates that rate-limit, throttle, enforce contracts, and mediate access. Never directly against raw infrastructure.
+**What it is.** Agents act through gates that rate-limit, throttle, enforce contracts, and mediate access. No path from agent to system of record exists that cannot say no.
 
-**Why it is hard.** Not conceptually. Every architect knows gateways. What is hard is refusing the exceptions: the internal tool that is "just for the demo," the direct database handle that is "temporary." Agents retry, loop, and fan out in ways humans do not, and every ungated path is a path where nothing stands between a retry loop and your infrastructure.
+**Why it is hard.** Not conceptually; every architect knows gateways. The difficulty is the discipline of refusing exceptions: the internal tool exposed "just for the demo," the direct database handle that is "temporary." Each ungated path is a location where nothing stands between a retry loop and the infrastructure, and agentic retry behavior converts that gap from theoretical to scheduled.
 
-**What it prevents.** Self-inflicted denial of service, contract drift, and the ungoverned side door. An agent that can DDoS your own systems by trying hard is not a hypothetical; it is a Tuesday.
+**What it prevents.** Self-inflicted denial of service, contract drift, and the ungoverned side door. An agent capable of degrading its own enterprise's systems by trying hard is not a hypothetical failure mode; it is the default one.
 
-**You don't have this layer if** any agent in your estate can reach a system of record without passing something that can say no.
+**You don't have this layer if** any agent in the estate can reach a system of record without passing a policy enforcement point.
 
 #### Layer 8: Integration Architecture
 
-**What it is.** The pipes, queues, transforms, and contracts through which agents actually touch enterprise systems. In practice the integration layer is not a prerequisite to the agent. It is the agent, or at least the part of the agent that does anything that matters.
+**What it is.** The pipes, queues, transforms, and contracts through which agents touch enterprise systems. The claim, defended from operations rather than aesthetics: the integration layer is not a prerequisite to the agent. Functionally, it is the agent, or at least the portion of the agent that performs consequential work.
 
-**Why it is hard.** Because it is unglamorous and everyone believes theirs is fine. Agentic work stresses integration differently: higher volumes, machine-shaped retries, partial failures mid-plan, and the need for every hop to carry identity and authority forward rather than dropping them at the first queue.
+**Why it is hard.** The steel-man is that most enterprises believe their integration layer is adequate, and by pre-agentic standards many are. The puncture is that agentic work changes the load profile in four ways at once: higher volume, machine-shaped retries, partial failure in the middle of multi-step plans, and the requirement that identity and authority propagate across every hop rather than terminating at the first queue. An integration layer scored against the old profile can fail all four tests while its dashboards stay green.
 
-**What it prevents.** The capability mirage. An agent demo against a mocked endpoint proves nothing about the agent; production behavior lives in the integration layer's failure modes, and shops that skipped this layer discover their agent strategy is actually an integration backlog.
+**What it prevents.** The capability mirage. A demo against a mocked endpoint measures nothing about production behavior, because production behavior lives in the integration layer's failure modes. Organizations that skip this layer discover, at scale, that their agent strategy was an integration backlog wearing a strategy's name.
 
-**You don't have this layer if** your agent's plan survives contact with the demo but not with the third-party API's Tuesday maintenance window.
+**You don't have this layer if** the agent's plan survives the demo but not the third-party API's scheduled maintenance window.
 
 ### Pillar III. The Substrate (Layers 5, 6)
 
-What does the agent know, and is it fit to reason on?
+The pillar concerns the epistemic quality of what agents reason over. Canonical data modeling is unglamorous, politically expensive, and analytically prior to everything in Part Two: an agent's conclusions inherit the defects of its substrate, and no downstream control repairs an upstream falsehood.
 
 #### Layer 5: Data Quality & Canonical Models
 
-**What it is.** A canonical model of the domain, and data quality discipline behind it, so that agents reason against one coherent representation instead of a dozen vendor dialects.
+**What it is.** One coherent, governed representation of the domain, with data-quality discipline behind it, so that agents reason against a canonical model rather than a dozen vendor dialects that disagree at the margins.
 
-**Why it is hard.** Canonical models are long, political work with no demo at the end, which is why this is the most commonly skipped layer in the stack. And the failure mode is uniquely treacherous: dirty data does not make an agent look broken. It makes the agent confidently wrong, in fluent prose, with citations to the wrong number.
+**Why it is hard.** Canonical modeling is long work with no demo at the end, which is why it is the most commonly skipped layer in the stack. Its failure mode is also uniquely resistant to detection. A hallucination is at least occasionally identifiable by its strangeness. A fluent, well-formed answer computed from a stale or duplicated record is identifiable only by a reader who already knew the truth, which is precisely the reader the agent was meant to replace.
 
-**What it prevents.** Eloquent nonsense at scale. A hallucination is at least sometimes detectable by its strangeness; a correct-sounding answer computed from a stale or duplicated record is detectable only by someone who already knew the truth.
+**What it prevents.** Confidently wrong output at scale: eloquent nonsense with citations to the wrong number. The distinction matters for governance because the two failure classes route differently. Hallucination is a model problem; confident wrongness on dirty data is an architecture problem, and only one of them is fixable with a better model.
 
-**You don't have this layer if** two systems disagree about a basic fact of your domain and your agent has no way to know which one is canonical.
+**You don't have this layer if** two systems disagree about a basic fact of the domain and the agent has no way to know which is canonical.
 
 #### Layer 6: Data Privacy & Compliance
 
-**What it is.** Two enforcement points, both mandatory: policy enforcement at the gateway where data leaves, and lineage through the pipeline that records where data came from, what it fed, and where it went.
+**What it is.** Two enforcement points, jointly necessary: policy enforcement at the boundary where data moves, and lineage through the pipeline recording where data originated, what it influenced, and where it went.
 
-**Why it is hard.** Most organizations have one or neither. Gateway enforcement without lineage cannot answer "what did this record influence"; lineage without enforcement can narrate a violation beautifully after it happens. Agents make both harder because they move data across purposes: retrieved for one task, useful for another, and nothing but architecture stands between those two.
+**Why it is hard.** Most organizations hold one or neither. Boundary enforcement without lineage cannot answer "what did this record influence." Lineage without enforcement narrates violations elegantly after they occur. Agents sharpen the problem because they move data across purposes: a record lawfully retrieved for one task remains available, in context or memory, for the next task, and nothing but architecture separates permitted use from purpose drift.
 
-**What it prevents.** Purpose drift, and the audit that ends careers. Data lawfully retrieved for a support task and quietly reused for something else is a violation even when every individual access was authorized.
+**What it prevents.** Purpose drift, and the specific audit failure where every individual access was authorized and the aggregate use was a violation. Purpose limitation is a compliance obligation, not a courtesy, and it is enforceable only where lineage exists (cf. NIST AI RMF 2023; ISO/IEC 42001:2023 on accountability structures).
 
-**You don't have this layer if** you can say who accessed a record but not what the access influenced.
+**You don't have this layer if** you can state who accessed a record but not what the access influenced.
 
 ### Cross-cutting in Part One: Layer 4
 
 #### Layer 4: Observability & Audit Logging
 
-**What it is.** Every agent action traceable: what it did, why, which data it touched, under whose authority, and what happened next. This layer belongs to no pillar because it is the precondition for auditing all of them.
+**What it is.** Every agent action traceable: what was done, under whose authority, touching which data, with what result. The layer belongs to no pillar because it is the precondition for auditing all of them.
 
-**Why it is hard.** Volume and meaning. Agents generate more events than humans by orders of magnitude, and traditional logs answer "what happened to the system" when the governing question is "what was the agent trying to do." Capturing intent, context, and authority alongside the action is a different logging discipline, and retrofitting it is far more expensive than building it in.
+**Why it is hard.** Volume and semantics. Agents emit events at rates that exceed human-driven systems by orders of magnitude, and conventional logging answers "what happened to the system" where the governing question is "what was the agent attempting." Capturing intent, context, and authority alongside the action is a distinct logging discipline, and it is dramatically cheaper to build in than to retrofit, because the fields that matter are unrecoverable after the fact.
 
-**What it prevents.** Governance by assertion. Without a record strong enough to reconstruct an incident, every claim about agent behavior is a hope wearing a dashboard.
+**What it prevents.** Governance by assertion. Absent a record sufficient to reconstruct an incident, every claim about agent behavior is a hope with a dashboard. Serves: provable.
 
-**You don't have this layer if** reconstructing why an agent did something requires asking the engineer who built it.
+**You don't have this layer if** reconstructing why an agent acted requires interviewing the engineer who deployed it.
 
-Layer 4 records the *what*. Its counterpart in Part Two, Layer 16, records the *why*. Together they form the evidence spine of the stack, and they are discussed as a pair in the cross-cutting section below.
+Layer 4 records what happened. Its Part Two counterpart, Layer 16, records why it was concluded. Section 5 treats them as one spine.
 
 ---
 
-## Part Two: The Agentic Control Plane
-
-*What the shop adds when the apprentice starts doing real work. Invisible until it is missing.*
+## 4. Part Two: The Agentic Control Plane
 
 ### Pillar IV. Governed Belief (Layers 9, 10)
 
-What may the agent come to believe, and how does belief improve?
+The pillar restates belief revision for production systems. The formal literature on theory change (Alchourrón, Gärdenfors & Makinson 1985) asked which propositions an agent should retain, revise, or retract as evidence arrives; the operational literature never needed the question until software began accumulating durable beliefs between sessions. Agent memory forces it. A memory store is not a cache to be filled but a belief set to be governed, and the difference is the difference between retrieval speed and epistemic integrity.
 
 #### Layer 9: Agent Memory Governance
 
-**What it is.** Memory is not a cache. It is a system of belief, and beliefs need governance. Write policies decide which observations an agent may promote into durable memory, which require confirmation before they harden, and which never graduate beyond a scratchpad. Every write carries an immutable audit of who believed it, why, and with what confidence. A scratchpad is not a system of record, and an architecture that cannot tell them apart has already lost.
+**What it is.** Write governance over what an agent may promote into durable memory. Observations pass through explicit policy: some may be written freely to working storage, some require confirmation before they harden into reference knowledge, some may never graduate past a scratchpad. Every write carries an immutable audit of the writing agent, its stated basis, and its confidence. The load-bearing distinction is that a scratchpad is not a system of record, and an architecture that cannot tell them apart has already conceded the layer.
 
-**Why it is hard.** Because ungoverned memory looks like a feature. An agent that "learns" by writing whatever it concludes gets smarter in the demo and stranger in production, as one bad inference becomes tomorrow's premise. This is also the layer most organizations have not heard of, which means nobody is asking for it until the strangeness arrives.
+**Why it is hard.** Ungoverned memory presents as a feature. An agent that "learns" by writing whatever it concludes improves visibly in demonstration and degrades invisibly in production, as one unvalidated inference becomes the premise of the next session's reasoning. The failure is autocatalytic, which distinguishes it from ordinary data-quality decay. It is also the layer with the least name recognition in the stack, so no stakeholder requests it before the degradation arrives.
 
-**What it prevents.** Belief poisoning, compounding error, and the slow drift of an agent's worldview away from the enterprise's. Also the injection attack that arrives not through a prompt but through a memory the agent trusts because it wrote it.
+**What it prevents.** Belief poisoning and compounding error, including the injection variant that arrives not through a prompt but through a stored memory the agent trusts because it wrote it. Prompt injection is a session-scoped attack; memory poisoning is a persistent one, and only write governance addresses persistence.
 
-**You don't have this layer if** anything an agent concludes tonight is something it believes tomorrow, with no gate in between.
+**You don't have this layer if** anything an agent concludes tonight is something it believes tomorrow, with no gate between the two.
 
 #### Layer 10: Success & Failure Pattern Learning
 
-**What it is.** An explicit outcome loop. Every consequential agent action produces a recorded result; results update the confidence attached to the patterns that produced them; retrieval favors what has actually worked and demotes what has actually failed.
+**What it is.** An explicit outcome loop. Consequential actions produce recorded results; results update the confidence attached to the patterns that produced them; retrieval ranks by demonstrated performance, promoting what has worked and demoting what has failed.
 
-**Why it is hard.** Closing the loop requires knowing what "worked" means per task type, which drags in Layer 12's closure definitions, and it requires the humility to record failure in a durable, queryable way. Most systems log failures for debugging and then never let the failure inform the next attempt.
+**Why it is hard.** The steel-man is that the model itself improves, so explicit outcome tracking is redundant scaffolding. The puncture is scope: model improvement is global and slow, while the patterns that matter operationally (this vendor's API misbehaves under these conditions; this transform fails on this record shape) are local, fast-moving, and absent from any training corpus. Closing the local loop requires a per-task definition of success, which drags in Layer 12, and it requires recording failure durably and queryably, which most systems do only for debugging and never for the next attempt.
 
-**What it prevents.** Confident repetition at scale. Without an outcome loop, an agent that found a plausible-but-wrong approach does not have a bad day; it has a bad career, repeating the mistake with unearned confidence every time the pattern matches.
+**What it prevents.** Confident repetition at scale. Without an outcome loop, an agent that found a plausible-but-wrong approach does not have a bad day. It has a bad career, re-executing the error with undiminished confidence each time the pattern matches.
 
-**You don't have this layer if** your agent's confidence in an approach is the same after ten failures as it was after none.
+**You don't have this layer if** an agent's confidence in an approach is the same after ten failures as after none.
 
 ### Pillar V. Earned Authority (Layers 11, 12, 13, 14)
 
-How much may the agent do on its own, and how does that change?
-
-This pillar is the guild made mechanical. Rank that is earned through observed work rather than granted at hiring; a definition of done that is not "the apprentice stopped"; a classification of which mistakes can be undone; and the master's absolute right to halt the work.
+The pillar restates graduated automation for enterprise agents. The precedent is explicit in other safety-critical domains: driving automation is stratified into defined levels with defined operational limits (SAE J3016), and no serious practitioner proposes granting the highest level on the strength of a demonstration. The pillar's four layers supply the equivalent stratification: a rank ladder, a definition of completion, a classification of consequence, and a stop mechanism. Together they answer the question deterministic systems never had to ask, because deterministic systems only ever did what they were told: how much may this actor do on its own judgment, and on what evidence does that change.
 
 #### Layer 11: Staged Autonomy
 
-**What it is.** Agents hold a rank: Observer, then Recommender, then Gated-Executor, then Autonomous. Promotion happens on measured evidence (acceptance rates, correction rates, stability of behavior over time), not on vendor claims or stakeholder enthusiasm. And some agents, by design, never graduate: the ceiling for an agent advising executives is a policy decision, not a performance gap.
+**What it is.** Agents hold an explicit rank: Observer, then Recommender, then Gated-Executor, then Autonomous. Promotion is earned on measured evidence (acceptance rates, correction rates, behavioral stability over time), not granted on vendor claims or stakeholder enthusiasm. The ladder also has a ceiling clause: some agents, by design, never graduate, because for certain advisory contexts the ceiling is a policy decision rather than a performance gap.
 
-**Why it is hard.** Organizational pressure runs one direction. The demo went well, the roadmap is ambitious, and every incentive says promote. Holding an agent at Recommender until the metrics justify Gated-Executor requires the same discipline as holding a junior employee's spending authority, applied to something that does not complain but also does not know what it does not know.
+**Why it is hard.** Institutional pressure runs one direction. The demonstration succeeded, the roadmap is ambitious, and every incentive argues for promotion. Holding an agent at Recommender until metrics justify Gated-Executor demands the same discipline as holding a junior employee's signing authority, applied to an actor that never complains and never knows what it does not know.
 
-**What it prevents.** Every agent being effectively autonomous from day one, which is what "no tier model" actually means in practice. Also the inverse failure: permanent distrust that keeps agents in demo purgatory because no defined path to authority exists.
+**What it prevents.** The default condition, which is that absent a tier model every deployed agent is effectively autonomous from day one. It also prevents the inverse failure: indefinite distrust that strands agents in demonstration purgatory because no defined path to authority exists. A graduation mechanism is as much an enabler as a brake.
 
-**You don't have this layer if** the question "what would this agent have to demonstrate to be allowed to act alone" has no written answer.
+**You don't have this layer if** the question "what would this agent need to demonstrate to act alone" has no written answer.
 
 #### Layer 12: Closure Rules
 
-**What it is.** A per-task-type definition of done. Budget exhaustion is not task completion. "Finished" must mean one of: output validated against defined criteria, externally confirmed by the system acted upon, signed off by a human, or explicitly escalated as unresolved. An agent that ran out of steps did not finish; it stopped, and the difference is the whole layer.
+**What it is.** A per-task-type definition of completion. Budget exhaustion is not task completion. "Finished" must resolve to one of four verifiable states: output validated against defined criteria, completion confirmed by the external system acted upon, a human signoff obtained, or the task explicitly escalated as unresolved. An agent that exhausted its steps did not finish. It stopped, and the distinction is the entire layer.
 
-**Why it is hard.** Defining verifiable completion per task type is domain work that nobody wants to own, and the default (the agent reports success, everyone believes it) is frictionless. The hard question "how would we know this is actually done" often reveals that the organization never knew, even for the human version of the task.
+**Why it is hard.** Defining verifiable completion per task type is domain work without an owner, and the frictionless default (the agent reports success; everyone believes it) is always available. The exercise is also diagnostic in an uncomfortable way: asking "how would we know this is actually done" frequently reveals that the organization never knew, even for the human-performed version of the task.
 
-**What it prevents.** Silent partial completion, the most corrosive agentic failure mode: work that looks done, is reported done, and quietly is not, discovered weeks later by whoever depends on it.
+**What it prevents.** Silent partial completion, arguably the most corrosive agentic failure mode: work that appears done, is reported done, and is not, discovered weeks later by whatever depended on it.
 
 **You don't have this layer if** "the agent said it finished" is accepted as evidence that it did.
 
 #### Layer 13: Reversibility Taxonomy
 
-**What it is.** Every action an agent can take, classified before deployment: Reversible (undo exists), Compensable (no undo, but a correcting action exists), or Irreversible (neither). Approval rigor scales with the class, and Irreversible actions require human signoff regardless of the agent's autonomy rank, with the prior state captured before the action executes.
+**What it is.** Every action available to an agent, classified before deployment: Reversible (an undo exists), Compensable (no undo, but a correcting action exists), Irreversible (neither). The taxonomy descends from the compensating-transaction literature (Garcia-Molina & Salem 1987), which formalized the middle category: long-running work that cannot be rolled back can often still be compensated. Approval rigor scales with the class, and Irreversible actions require human signoff regardless of the acting agent's rank, with prior state captured before execution.
 
-**Why it is hard.** The taxonomy work is honest labor that surfaces uncomfortable truths, chief among them how many routine actions are quietly irreversible: the sent email, the external filing, the payment instruction. Teams discover their "low-risk" agent has a dozen irreversible verbs nobody had named.
+**Why it is hard.** The classification work is honest labor that surfaces unwelcome findings, chief among them how many routine actions are quietly irreversible: the sent email, the external filing, the payment instruction. Teams performing the exercise discover their "low-risk" agent holds a dozen irreversible verbs nobody had named.
 
-**What it prevents.** Rank outrunning blast radius. An agent trusted to act autonomously on reversible work should not inherit that trust for irreversible work; this layer is what makes that sentence enforceable rather than aspirational.
+**What it prevents.** Rank outrunning blast radius. An agent trusted to act autonomously on reversible work must not inherit that trust for irreversible work, and this layer is what converts that sentence from aspiration to mechanism.
 
 **You don't have this layer if** an agent's approval requirements are a function of the agent rather than of the action.
 
 #### Layer 14: Kill Switches
 
-**What it is.** The ability to stop, and stop precisely: halt an agent immediately, roll back its recent actions, freeze its spending, freeze its memory writes, hold its outbound communications, or demote its autonomy rank. Per agent, per tenant, per scope. And tested, because a kill switch that has never fired is a diagram, not a control. Named is not executable.
+**What it is.** The capacity to stop, with precision: halt an agent immediately, roll back its recent actions, freeze its spending, freeze its memory writes, hold its outbound communications, or demote its autonomy rank. Per agent, per tenant, per scope. And exercised under test, because the safety-engineering literature is unambiguous that an untested interlock is a diagram. Named is not executable.
 
-**Why it is hard.** Building stop-mechanisms feels like planning for failure, so it loses prioritization fights to features. The precision is also genuinely difficult: "stop the agent" is easy; "stop this agent's writes for this tenant while its read-only work continues" requires the stop-paths to be designed into the architecture rather than bolted on.
+**Why it is hard.** Stop mechanisms read as planning for failure and lose prioritization contests to features. The precision is also genuinely difficult. "Stop the agent" is trivial; "stop this agent's writes for this tenant while its read-only work continues" requires stop-paths designed into the architecture, because they cannot be appended to one.
 
-**What it prevents.** The incident where everyone agrees the agent must be stopped and nobody can say how, or the only available stop is an outage for every tenant at once.
+**What it prevents.** The incident in which all parties agree the agent must be stopped and no party can state how, or in which the only available stop is a full outage for every tenant simultaneously.
 
-**You don't have this layer if** your incident runbook's first step for a misbehaving agent is "find the engineer who deployed it."
+**You don't have this layer if** the incident runbook's first step for a misbehaving agent is locating the engineer who deployed it.
 
 ### Pillar VI. Accountable Speech (Layers 16, 18)
 
-What may the agent claim, and to whom?
+The pillar governs claims rather than actions, and it draws on two distinct literatures. Provenance standards (W3C PROV 2013) and the evidentiary concept of chain of custody supply the model for Layer 16: a conclusion is accountable when the material that produced it is preserved and traceable. Information-flow control (Bell & LaPadula 1973) supplies the model for Layer 18: what may be disclosed is a function of the recipient and the classification, enforced by the system rather than the discretion of the discloser. Both layers exist because agentic speech is consequential in a way deterministic output never was: an agent's recommendation lands in a decision-maker's judgment, and its disclosure lands in a recipient's knowledge, and neither landing can be recalled.
 
 #### Layer 16: Evidence Provenance
 
-**What it is.** Audit records what an agent did; provenance records why it concluded what it did. For every consequential recommendation or action: which memories and sources were retrieved, with what confidence, forming what chain of reasoning, under what policy evaluation. Assembled at decision time, verifiable after the fact, strong enough to hand to someone hostile.
+**What it is.** Audit records what an agent did; provenance records why it concluded what it did. For every consequential recommendation or action: which sources and memories were retrieved, at what confidence, composing what chain of reasoning, under what policy evaluation. Assembled at decision time, verifiable afterward, and sufficient for a hostile reviewer.
 
-**Why it is hard.** Provenance must be captured in the moment; it cannot be reconstructed later from ordinary logs, because the retrieval rankings and confidence states that shaped the conclusion are gone by morning. That means the reasoning pipeline itself has to be built to emit evidence, which is an architectural decision, not a logging setting.
+**Why it is hard.** Provenance must be captured in the moment. It cannot be reconstructed from ordinary logs, because the retrieval rankings and confidence states that shaped a conclusion are transient and are gone by the next session. The reasoning pipeline itself must therefore emit evidence as a design property, which is an architectural commitment rather than a logging configuration.
 
-**What it prevents.** The unanswerable question. When a regulator, a board, or a wronged party asks "why did the system conclude this," an audit log offers a shrug with timestamps. Provenance is the difference between "here is the chain" and "we believe the agent had its reasons."
+**What it prevents.** The unanswerable question. When a regulator, a board, or an affected party asks why the system concluded what it concluded, an audit log offers a shrug with timestamps. Provenance is the difference between producing the chain and asserting that the agent presumably had its reasons. Regulatory trajectories (NIST AI RMF 2023; ISO/IEC 42001:2023) point uniformly toward the former being demanded.
 
 **You don't have this layer if** the explanation for an agent's recommendation would have to be regenerated rather than retrieved.
 
 #### Layer 18: Communication Scope Enforcement
 
-**What it is.** Authorization to speak, distinct from authorization to act. Which stakeholders an agent may address, on which topics, at what data sensitivity, with what review requirements. Enforced as an architectural boundary on the agent's output path, not as a paragraph of prompt asking it nicely.
+**What it is.** Authorization to speak, distinct from authorization to act: which stakeholders an agent may address, on which topics, at what data sensitivity, under what review requirements. Enforced as an architectural control on the output path, not requested as a paragraph of prompt.
 
-**Why it is hard.** Speech feels safer than action, so it gets governed last, and prompt instructions feel like enforcement until the first time context pressure squeezes one out of the window. The genuinely hard part is that scope is contextual: the same fact is appropriate for one audience and a violation for another, and the boundary has to know the difference.
+**Why it is hard.** Speech is perceived as safer than action, so it is governed last, and prompt-level instruction resembles enforcement until context pressure displaces it. The substantive difficulty is that scope is relational: the identical fact is appropriate for one recipient and a violation for another, and the enforcement point must evaluate the pair, not the fact.
 
-**What it prevents.** The agent that answers a junior employee's question with the executive briefing, discloses one tenant's pattern to another, or commits the company in writing to something no human approved. Action failures corrupt systems; speech failures corrupt trust, and trust restores slower.
+**What it prevents.** The agent that answers a junior employee with the executive briefing, discloses one tenant's pattern to another, or commits the organization in writing to terms no human approved. Action failures corrupt systems; speech failures corrupt trust, and of the two, trust restores more slowly.
 
-**You don't have this layer if** the only thing preventing an agent from telling the wrong person the right fact is a sentence in its system prompt.
+**You don't have this layer if** the only barrier between an agent and the wrong recipient of a true fact is a sentence in its system prompt.
 
 ---
 
-## The cross-cutting layers
+## 5. The cross-cutting disciplines
 
-Three layers, plus one pairing, refuse to stay inside a pillar. That refusal is the point: they are the disciplines the whole shop practices rather than stations on the floor.
+Three layers, and one pairing, operate across every pillar rather than within one. Their exclusion from the pillar table is deliberate: they are properties the whole architecture exhibits, not stations within it.
 
-**The evidence spine: Layers 4 and 16 together.** Layer 4 (what happened) runs under all of Part One; Layer 16 (why it was concluded) runs under all of Part Two. Together they are the stack's answer to the question every other layer eventually gets asked: prove it. Identity claims are proven by audit. Autonomy promotions are justified by recorded outcomes. Closure is demonstrated, not asserted. Kill-switch invocations are reconstructable. A stack with seventeen layers and no evidence spine is a stack of assertions.
+**The evidence spine: Layers 4 and 16.** Layer 4 (what happened) underlies all of Part One; Layer 16 (why it was concluded) underlies all of Part Two. Jointly they answer the demand every other layer eventually faces: prove it. Identity claims are proven by audit. Autonomy promotions are justified by recorded outcomes. Closure is demonstrated rather than asserted. Kill-switch invocations are reconstructable. A seventeen-layer stack without the evidence spine is a stack of assertions, and assertions do not survive audit, incident review, or discovery.
 
-**Layer 15: Structural Coherence & Drift Detection.** This layer watches the shape of the work itself: whether an agent's actions still connect to its goals, whether a session is fragmenting into disconnected efforts, whether behavior is drifting across sessions in a direction nobody chose. It is cross-cutting because drift is not the failure of any one layer. Every other control can hold (identity intact, permissions honored, closures met) while the agent's work slowly stops serving its purpose. Coherence signals are the early-warning instrument: the iceberg, not the shipwreck. It is also, paired with provenance, where credibility is most publicly lost when absent, because drift discovered by your customer is drift you announced you weren't watching for.
+**Layer 15: Structural Coherence & Drift Detection.** The layer monitors the shape of the work itself: whether an agent's actions remain connected to its goals, whether a session is fragmenting into disconnected efforts, whether behavior drifts across sessions in a direction no one selected. The natural formalism is graph-theoretic. Model the execution as a graph of actions, dependencies, and goals, and degradation acquires measurable signatures: the graph fragments into disconnected components, or goal nodes become unreachable from the work actually performed. The layer is cross-cutting because drift is not the failure of any single control. Identity can hold, permissions can be honored, closures can be met, and the work can nonetheless cease to serve its purpose. Coherence signals are the leading indicator where every other layer provides lagging ones, and a leading indicator is the difference between detecting the iceberg and documenting the shipwreck.
 
-**You don't have Layer 15 if** the first indication of an agent drifting off-goal would be a human noticing the output got weird.
+**You don't have Layer 15 if** the first indication of an agent drifting off-goal would be a human noticing that the output got strange.
 
-**Layer 17: Idempotency.** Every write, everywhere in the stack, carries an idempotency key and a prior-execution check. Cross-cutting because retries are not an edge case in agentic systems; they are the texture of the runtime. Agents retry on ambiguity, replays happen on recovery, and queues deliver at-least-once. Boring plumbing until a retry double-charges someone, double-sends the offer letter, or double-files the report, at which point it is the only layer anyone wants to talk about.
+**Layer 17: Idempotency.** An operation is idempotent when applying it more than once yields the state of applying it once. The property is dictated by the delivery semantics of distributed infrastructure: queues deliver at least once, recoveries replay, and agents retry on ambiguity, so duplicate execution is not an edge case but a scheduled event. Every write therefore carries an idempotency key and a prior-execution check, wherever in the stack the write originates. The layer is unglamorous until a retry double-charges an account, double-sends an offer letter, or double-files a report, at which point it is briefly the only layer anyone discusses.
 
 **You don't have Layer 17 if** replaying yesterday's queue would change today's data.
 
-**And the reach of Layer 13.** Reversibility lives in Pillar V, but its classification modulates the whole stack's strictness: how much provenance a decision must carry, how senior the closure signoff must be, which autonomy rank may touch the action at all, and how fast a kill switch must be able to fire. Blast radius is the exchange rate between layers. An architecture that applies uniform rigor to reversible and irreversible actions has mispriced both.
+**The outward reach of Layer 13.** Reversibility resides in Pillar V, but its classification modulates the strictness of the entire stack: how much provenance a decision must carry, how senior a closure signoff must be, which autonomy rank may touch the action at all, how quickly a kill switch must be able to fire. Blast radius is the exchange rate among the layers. An architecture applying uniform rigor to reversible and irreversible actions has mispriced both: the reversible work is over-governed into uselessness, and the irreversible work is under-governed into exposure.
 
 ---
 
-## Proportionality
+## 6. Proportionality
 
-Not every agent needs the full weight of all eighteen layers at maximum strictness, and a readiness model that pretends otherwise becomes approval theater that teams route around. The stack is graded, and the grading key is Pillar V: an Observer summarizing documents needs identity, gates, substrate, and evidence, but its closure rules can be light and its kill switch simple. A Gated-Executor touching payroll needs everything, tested. Rigor follows authority and blast radius, not organizational anxiety.
+A readiness model that demands maximum strictness for every agent becomes approval theater, and approval theater is routed around, which is worse than honest under-governance because it is invisible. The stack is therefore graded, and Pillar V supplies the grading key. An Observer summarizing documents requires identity, mediation, substrate, and evidence, but its closure rules may be light and its stop mechanism simple. A Gated-Executor touching payroll requires everything, under test. Rigor follows authority and blast radius.
 
-What is not proportional is the evidence spine. Attribution and proof are the layers you cannot retrofit after the incident that makes you want them.
-
----
-
-## What this framework is not
-
-This document defines readiness. It deliberately does not define implementation: no schemas, no product mappings, no vendor prescriptions, no deployment topologies. Those decisions belong to each shop's architecture, and a readiness model that smuggled one implementation in would be an advertisement wearing a checklist.
-
-The boundary is also the honest statement of what a framework can do. A readiness map tells you what must be true before agents can be trusted with consequential work. Making those things true, against real tenants, real regulators, and real data, is the work itself. Judgment described is a thought partner. Judgment executed, under governance, against data that matters, is a platform. This document is the former on purpose.
+One element does not grade: the evidence spine. Attribution and proof are the properties that cannot be retrofitted after the incident that creates the demand for them, so they are the minimum for every rank, including Observer.
 
 ---
 
-## The residue
+## 7. Scope: what this framework is not
 
-Strip away the layer numbers and the stack says one old thing.
+This document defines readiness. It deliberately does not define implementation: no schemas, no product mappings, no vendor prescriptions, no deployment topologies. Those decisions belong to each organization's architecture, and a readiness model that smuggled one implementation inside itself would be an advertisement wearing a checklist.
 
-No shop ever produced a master by hiring talent and hoping. Masters are produced by workshops: places with the supervision to watch the early work, the boundaries to make early mistakes survivable, the records to prove what was done and why, and the standing rule that the tools stop when the master says stop. The apprentice supplies the capability. The workshop supplies the trust.
+The restriction is also an honest statement of what a framework can accomplish. A readiness model states what must be true before agents can be trusted with consequential work. Making it true, against real tenants, real regulators, and real data, is the work itself, and it is not performed by documents. Judgment described is a thought partner. Judgment executed under governance, against data that matters, is a platform. This document is the former, on purpose.
 
-Agents have the capability. The eighteen layers are the workshop.
+---
 
-A master isn't made by talent. A master is made by a shop that could safely let one become a master.
+## 8. Conclusion
+
+The argument compresses to three sentences. Agentic systems invalidate the specification premise on which forty years of software assurance rested, so assurance must relocate from the output to the architecture surrounding the actor. That architecture decomposes into eighteen layers across six pillars and three cross-cutting disciplines, each of which exists because a specific, nameable failure occurs in its absence. Readiness is the condition in which every action an agent takes is attributable, bounded, and provable, and the self-tests attached to each layer are the falsifiable form of that claim.
+
+What does not compress is the older point underneath. No profession has ever produced trusted practitioners by talent alone; it produced them through institutions that supervised early work, bounded early mistakes, kept records sufficient to assign credit and fault, and retained the unconditional right to stop the work. The layers are those institutions, rebuilt for actors that act at machine rate. The capability arrived with the models. The trust has to be constructed.
+
+---
+
+## References
+
+Alchourrón, C., Gärdenfors, P., & Makinson, D. (1985). On the logic of theory change: Partial meet contraction and revision functions. *Journal of Symbolic Logic*, 50(2).
+
+Bell, D. E., & LaPadula, L. J. (1973). *Secure computer systems: Mathematical foundations*. MITRE Technical Report 2547.
+
+Garcia-Molina, H., & Salem, K. (1987). Sagas. *Proceedings of ACM SIGMOD 1987*.
+
+ISO/IEC 42001:2023. *Information technology: Artificial intelligence management system*.
+
+Meyer, B. (1992). Applying "design by contract". *IEEE Computer*, 25(10).
+
+NIST (2023). *Artificial Intelligence Risk Management Framework (AI RMF 1.0)*.
+
+Nygard, M. (2018). *Release It! Design and Deploy Production-Ready Software* (2nd ed.). Pragmatic Bookshelf. (Original work published 2007.)
+
+SAE International. *J3016: Taxonomy and definitions for terms related to driving automation systems*.
+
+Saltzer, J. H., & Schroeder, M. D. (1975). The protection of information in computer systems. *Proceedings of the IEEE*, 63(9).
+
+Tomašev, N., Franklin, M., & Osindero, S. (2026). *Intelligent AI Delegation*. Google DeepMind. arXiv:2602.11865.
+
+W3C (2013). *PROV-DM: The PROV data model*. W3C Recommendation.
 
 ---
 
